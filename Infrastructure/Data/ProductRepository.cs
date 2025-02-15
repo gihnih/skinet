@@ -7,7 +7,6 @@ namespace Infrastructure.Data;
 
 public class ProductRepository(StoreContext context) : IProductRepository
 {
-
     public void AddProduct(Product product)
     {
         context.Products.Add(product);
@@ -28,9 +27,17 @@ public class ProductRepository(StoreContext context) : IProductRepository
         return await context.Products.FindAsync(id);
     }
 
-    public async Task<IReadOnlyList<Product>> GetProductsAsync()
+    public async Task<IReadOnlyList<Product>> GetProductsAsync(string? brand, string? type)
     {
-        return await context.Products.ToListAsync();
+        var query = context.Products.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(brand))
+            query = query.Where(x => x.Brand == brand);
+
+        if (!string.IsNullOrWhiteSpace(type))
+            query = query.Where(x => x.Type == type);
+
+        return await query.ToListAsync();
     }
 
     public async Task<IReadOnlyList<string>> GetTypeAsync()
